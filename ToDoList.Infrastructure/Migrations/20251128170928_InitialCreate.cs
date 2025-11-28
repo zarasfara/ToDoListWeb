@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace ToDoList.Api.Migrations
+namespace ToDoList.Infrastructure.Migrations
 {
     /// <inheritdoc />
     public partial class InitialCreate : Migration
@@ -16,10 +16,10 @@ namespace ToDoList.Api.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Title = table.Column<string>(type: "TEXT", nullable: false),
-                    Description = table.Column<string>(type: "TEXT", nullable: false),
+                    Title = table.Column<string>(type: "TEXT", maxLength: 200, nullable: false),
+                    Description = table.Column<string>(type: "TEXT", maxLength: 1000, nullable: false),
                     Type = table.Column<int>(type: "INTEGER", nullable: false),
-                    StateName = table.Column<string>(type: "TEXT", nullable: false)
+                    StateName = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false)
                 },
                 constraints: table =>
                 {

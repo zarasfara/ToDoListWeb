@@ -8,6 +8,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToDoList.Application", "ToD
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToDoList.Infrastructure", "ToDoList.Infrastructure\ToDoList.Infrastructure.csproj", "{7A3AE97D-1888-4D86-AF9A-11EC8265F05B}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{FC1D6924-F9A4-4A40-8276-DAF0F5562CB3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution items", "Solution items", "{4FE265DF-163A-4BC9-A17A-0AC7D3EA5E54}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +37,11 @@ Global
 		{7A3AE97D-1888-4D86-AF9A-11EC8265F05B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7A3AE97D-1888-4D86-AF9A-11EC8265F05B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7A3AE97D-1888-4D86-AF9A-11EC8265F05B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{0358CEF0-CF4D-4DF6-BEC9-B262FB409022} = {FC1D6924-F9A4-4A40-8276-DAF0F5562CB3}
+		{96C713B1-4940-4097-8163-3D3DBAECEDF7} = {FC1D6924-F9A4-4A40-8276-DAF0F5562CB3}
+		{1A12E676-B4B8-4790-91C4-286DBA9FAEE9} = {FC1D6924-F9A4-4A40-8276-DAF0F5562CB3}
+		{7A3AE97D-1888-4D86-AF9A-11EC8265F05B} = {FC1D6924-F9A4-4A40-8276-DAF0F5562CB3}
 	EndGlobalSection
 EndGlobal

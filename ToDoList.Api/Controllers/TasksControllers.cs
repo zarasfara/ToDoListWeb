@@ -1,128 +1,196 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using ToDoList.Api.Data;
-using ToDoList.Api.Models;
-using TaskFactory = ToDoList.Api.Models.TaskFactory;
+using ToDoList.Api.ModelRequests;
+using ToDoList.Application.Dtos;
+using ToDoList.Application.Services;
+using ToDoList.Domain;
 
 namespace ToDoList.Api.Controllers;
 
-public class TasksController : Controller
+public class TasksController(ITaskService taskApiService) : Controller
 {
-    private readonly ToDoListContext _context;
-    private readonly TaskFactory _factory = new();
-
-    public TasksController(ToDoListContext context)
-    {
-        _context = context;
-    }
-
-    // LIST
+    /// <summary>
+    ///     Отображает список задач с возможностью фильтрации по статусу и типу
+    /// </summary>
+    /// <param name="state">Фильтр по статусу задачи (New, InProgress, Completed)</param>
+    /// <param name="type">Фильтр по типу задачи (Regular, Priority, Repeating)</param>
+    /// <returns>Представление со списком задач</returns>
     public async Task<IActionResult> Index(string? state, TaskType? type)
     {
-        var query = _context.Tasks.AsQueryable();
+        // Получаем задачи из сервиса
+        var taskDtos = await taskApiService.GetTasksAsync(state, type);
 
-        if (!string.IsNullOrEmpty(state))
+        // Преобразуем DTO в ViewModel для представления
+        var taskViewModels = taskDtos.Select(t => new GetTask
         {
-            query = query.Where(t => t.StateName == state);
-        }
+            Id = t.Id,
+            Title = t.Title,
+            Description = t.Description,
+            Type = t.Type,
+            StateName = t.StateName,
+        }).ToList();
 
-        if (type != null)
-        {
-            query = query.Where(t => t.Type == type);
-        }
-
-        var tasks = await query.ToListAsync();
-        return View(tasks);
+        return View(taskViewModels);
     }
 
-    // CREATE GET
+    /// <summary>
+    ///     Отображает форму создания новой задачи (GET)
+    /// </summary>
     public IActionResult Create()
-    {
-        return View();
-    }
+        => View();
 
-    // CREATE POST
+    /// <summary>
+    ///     Обрабатывает отправку формы создания задачи (POST)
+    /// </summary>
+    /// <param name="model">Данные новой задачи</param>
+    /// <returns>Результат создания задачи</returns>
     [HttpPost]
-    public async Task<IActionResult> Create(string title, string description, TaskType type)
+    public async Task<IActionResult> Create(CreateTask model)
     {
-        var task = _factory.CreateTask(type);
-        task.Title = title;
-        task.Description = description;
+        // Проверяем валидность модели
+        if (!ModelState.IsValid)
+        {
+            // Если данные невалидны, возвращаем форму с ошибками
+            return View(model);
+        }
 
-        _context.Tasks.Add(task);
-        await _context.SaveChangesAsync();
+        // Преобразуем ViewModel в DTO и создаем задачу через сервис
+        await taskApiService.CreateTaskAsync(new CreateTaskDto
+        {
+            Title = model.Title,
+            Description = model.Description,
+            Type = model.Type,
+        });
+
+        // Перенаправляем на список задач после успешного создания
         return RedirectToAction(nameof(Index));
     }
 
-    // EDIT GET
+    /// <summary>
+    ///     Отображает форму редактирования задачи (GET)
+    /// </summary>
+    /// <param name="id">Идентификатор задачи для редактирования</param>
+    /// <returns>Представление формы редактирования</returns>
     public async Task<IActionResult> Edit(int id)
     {
-        var task = await _context.Tasks.FindAsync(id);
-        if (task == null)
+        // Получаем задачу по ID
+        var taskDto = await taskApiService.GetTaskByIdAsync(id);
+        if (taskDto == null)
         {
+            // Если задача не найдена, возвращаем 404
             return NotFound();
         }
 
-        return View(task);
+        // Преобразуем TaskDto в EditTask для представления
+        var model = new EditTask
+        {
+            Id = taskDto.Id,
+            Title = taskDto.Title,
+            Description = taskDto.Description,
+            Type = taskDto.Type,
+        };
+
+        return View(model);
     }
 
-    // EDIT POST
+    /// <summary>
+    ///     Обрабатывает отправку формы редактирования задачи (POST)
+    /// </summary>
+    /// <param name="model">Обновленные данные задачи</param>
+    /// <returns>Результат обновления задачи</returns>
     [HttpPost]
-    public async Task<IActionResult> Edit(TaskItem updated)
+    public async Task<IActionResult> Edit(EditTask model)
     {
-        var task = await _context.Tasks.FindAsync(updated.Id);
-        if (task == null)
+        // Проверяем валидность модели
+        if (!ModelState.IsValid)
         {
-            return NotFound();
+            // Если данные невалидны, возвращаем форму с ошибками
+            return View(model);
         }
 
-        task.Title = updated.Title;
-        task.Description = updated.Description;
-        task.Type = updated.Type;
+        try
+        {
+            // Преобразуем ViewModel в DTO и обновляем задачу через сервис
+            await taskApiService.UpdateTaskAsync(new UpdateTaskDto
+            {
+                Id = model.Id,
+                Title = model.Title,
+                Description = model.Description,
+                Type = model.Type,
+            });
 
-        await _context.SaveChangesAsync();
-        return RedirectToAction(nameof(Index));
+            // Перенаправляем на список задач после успешного обновления
+            return RedirectToAction(nameof(Index));
+        }
+        catch (ArgumentException)
+        {
+            // Если задача не найдена (ArgumentException из сервиса), возвращаем 404
+            return NotFound();
+        }
     }
 
-    // DELETE GET
+    /// <summary>
+    ///     Отображает страницу подтверждения удаления задачи (GET)
+    /// </summary>
+    /// <param name="id">Идентификатор задачи для удаления</param>
+    /// <returns>Представление подтверждения удаления</returns>
     public async Task<IActionResult> Delete(int id)
     {
-        var task = await _context.Tasks.FindAsync(id);
-        if (task == null)
+        // Получаем задачу по ID
+        var taskDto = await taskApiService.GetTaskByIdAsync(id);
+        if (taskDto == null)
         {
+            // Если задача не найдена, возвращаем 404
             return NotFound();
         }
 
-        return View(task);
+        // Преобразуем TaskDto в GetTask для представления подтверждения удаления
+        var viewModel = new GetTask
+        {
+            Id = taskDto.Id,
+            Title = taskDto.Title,
+            Description = taskDto.Description,
+            Type = taskDto.Type,
+            StateName = taskDto.StateName,
+        };
+
+        return View(viewModel);
     }
-    
-    // DELETE POST
-    [HttpPost, ActionName("Delete")]
+
+    /// <summary>
+    ///     Обрабатывает подтверждение удаления задачи (POST)
+    /// </summary>
+    /// <param name="id">Идентификатор задачи для удаления</param>
+    /// <returns>Результат удаления задачи</returns>
+    [HttpPost]
+    [ActionName("Delete")]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
-        var task = await _context.Tasks.FindAsync(id);
-        if (task != null)
-        {
-            _context.Tasks.Remove(task);
-            await _context.SaveChangesAsync();
-        }
+        // Удаляем задачу через сервис
+        await taskApiService.DeleteTaskAsync(id);
 
+        // Перенаправляем на список задач после успешного удаления
         return RedirectToAction(nameof(Index));
     }
-    
-    // NEXT STATE
+
+    /// <summary>
+    ///     Переводит задачу в следующий статус (New → InProgress → Completed)
+    /// </summary>
+    /// <param name="id">Идентификатор задачи</param>
+    /// <returns>Результат изменения статуса</returns>
     public async Task<IActionResult> NextState(int id)
     {
-        var task = await _context.Tasks.FindAsync(id);
-        if (task == null)
+        try
         {
+            // Переводим задачу в следующий статус через сервис
+            await taskApiService.MoveToNextStateAsync(id);
+
+            // Перенаправляем на список задач после успешного изменения статуса
+            return RedirectToAction(nameof(Index));
+        }
+        catch (ArgumentException)
+        {
+            // Если задача не найдена (ArgumentException из сервиса), возвращаем 404
             return NotFound();
         }
-        
-        task.SyncStateObject();
-        task.MoveToNextState();
-
-        await _context.SaveChangesAsync();
-        return RedirectToAction(nameof(Index));
     }
 }

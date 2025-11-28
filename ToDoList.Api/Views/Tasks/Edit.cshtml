@@ -1,33 +1,41 @@
-﻿@model ToDoList.Api.Models.TaskItem
+﻿@using ToDoList.Domain
+@model ToDoList.Api.ModelRequests.EditTask
 
 <div class="container">
-    <h2><i class="bi bi-pencil-square text-warning"></i> Edit Task</h2>
+    <h2><i class="bi bi-pencil-square text-warning"></i> Редактировать задачу</h2>
 
     <form method="post">
-        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="Id"/>
 
         <div class="mb-4">
-            <label class="form-label"><i class="bi bi-fonts"></i> Title</label>
-            <input asp-for="Title" class="form-control" required />
+            <label asp-for="Title" class="form-label"><i class="bi bi-fonts"></i> Название</label>
+            <input asp-for="Title" class="form-control" required/>
+            <span asp-validation-for="Title" class="text-danger"></span>
         </div>
 
         <div class="mb-4">
-            <label class="form-label"><i class="bi bi-card-text"></i> Description</label>
+            <label asp-for="Description" class="form-label"><i class="bi bi-card-text"></i> Описание</label>
             <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+            <span asp-validation-for="Description" class="text-danger"></span>
         </div>
 
         <div class="mb-4">
-            <label class="form-label"><i class="bi bi-tags"></i> Type</label>
-            <select asp-for="Type" class="form-select">
-                <option value="0">Regular</option>
-                <option value="1">Priority</option>
-                <option value="2">Repeating</option>
+            <label asp-for="Type" class="form-label"><i class="bi bi-tags"></i> Тип</label>
+            <select asp-for="Type" class="form-select"
+                    asp-items="Html.GetEnumSelectList<TaskType>()">
             </select>
+            <span asp-validation-for="Type" class="text-danger"></span>
         </div>
 
         <button type="submit" class="btn btn-success px-4">
-            <i class="bi bi-floppy"></i> Save Changes
+            <i class="bi bi-floppy"></i> Сохранить изменения
         </button>
-        <a href="/Tasks" class="btn btn-outline-secondary">Cancel</a>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Отмена
+        </a>
     </form>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial"/>
+}

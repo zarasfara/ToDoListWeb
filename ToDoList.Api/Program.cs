@@ -1,14 +1,24 @@
 using Microsoft.EntityFrameworkCore;
-using ToDoList.Api.Data;
+using SQLitePCL;
+using ToDoList.Application.Services;
+using ToDoList.Domain.Repositories;
+using ToDoList.Infrastructure;
+using ToDoList.Infrastructure.Repositories;
 
-SQLitePCL.Batteries_V2.Init();
+Batteries_V2.Init();
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
 
-builder.Services.AddDbContext<ToDoListContext>(options =>
+builder.Services.AddDbContext<DatabaseContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+
+builder.Services.AddScoped<ITaskRepository, TaskRepository>();
+
+// Регистрация сервисов
+builder.Services.AddScoped<ITaskService, TaskService>();
 
 var app = builder.Build();
 
@@ -21,7 +31,7 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Tasks}/{action=Index}/{id?}");
+    "default",
+    "{controller=Tasks}/{action=Index}/{id?}");
 
 app.Run();
