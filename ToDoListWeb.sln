@@ -2,7 +2,7 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToDoList.Api", "ToDoList.Api\ToDoList.Api.csproj", "{0358CEF0-CF4D-4DF6-BEC9-B262FB409022}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToDoList.Domain", "..\ToDoListWeb.Domain\ToDoList.Domain\ToDoList.Domain.csproj", "{1A12E676-B4B8-4790-91C4-286DBA9FAEE9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToDoList.Domain", "ToDoListWeb.Domain\ToDoList.Domain\ToDoList.Domain.csproj", "{1A12E676-B4B8-4790-91C4-286DBA9FAEE9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToDoList.Application", "ToDoList.Application\ToDoList.Application.csproj", "{96C713B1-4940-4097-8163-3D3DBAECEDF7}"
 EndProject
