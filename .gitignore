@@ -1,0 +1,9 @@
+﻿.idea
+/bin
+/ToDoListWeb/obj
+/ToDoListWeb/bin
+/appsettings.Development.json
+/appsettings.json
+tasks.db
+tasks.db-shm
+tasks.db-wal

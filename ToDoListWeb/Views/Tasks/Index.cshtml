@@ -1,0 +1,77 @@
+﻿@model IEnumerable<ToDoListWeb.Models.TaskItem>
+
+@{
+ViewData["Title"] = "Tasks";
+}
+
+<div class="container">
+    <h2><i class="bi bi-card-checklist text-primary"></i> Tasks</h2>
+
+    <p>
+        <a href="/Tasks/Create" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Add Task
+        </a>
+    </p>
+
+    @if (!Model.Any())
+    {
+    <div class="alert alert-info text-center">
+        <i class="bi bi-inbox"></i> No tasks yet. Create your first one!
+    </div>
+    }
+    else
+    {
+    <table class="table table-hover">
+        <thead class="table-light">
+        <tr>
+            <th><i class="bi bi-fonts"></i> Title</th>
+            <th><i class="bi bi-tag"></i> Type</th>
+            <th><i class="bi bi-flag"></i> Status</th>
+            <th><i class="bi bi-gear"></i> Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var t in Model)
+        {
+        // Определяем CSS-класс на основе enum
+        string typeClass = t.Type switch
+        {
+        ToDoListWeb.Models.TaskType.Priority => "task-type-priority",
+        ToDoListWeb.Models.TaskType.Repeating => "task-type-repeating",
+        _ => "task-type-regular"
+        };
+
+        string statusClass = t.StateName?.ToLower() switch
+        {
+        "completed" => "status-completed",
+        "inprogress" => "status-inprogress", 
+        _ => "status-todo"
+        };
+        
+        string displayType = t.Type.ToString();
+        if (displayType == "Repeating") displayType = "Repeating";
+
+        <tr>
+            <td><strong>@t.Title</strong></td>
+            <td><span class="badge @typeClass rounded-pill px-3 py-2">@displayType</span></td>
+            <td><span class="badge @statusClass rounded-pill px-3 py-2">@t.StateName</span></td>
+            <td>
+                <a href="/Tasks/Edit/@t.Id" class="btn btn-warning btn-sm me-1">
+                    <i class="bi bi-pencil"></i> Edit
+                </a>
+                <a href="/Tasks/Delete/@t.Id" class="btn btn-danger btn-sm me-1">
+                    <i class="bi bi-trash"></i> Delete
+                </a>
+                @if (t.StateName != "Completed")
+                {
+                <a href="/Tasks/NextState/@t.Id" class="btn btn-success btn-sm">
+                    <i class="bi bi-arrow-right-circle"></i> Next
+                </a>
+                }
+            </td>
+        </tr>
+        }
+        </tbody>
+    </table>
+    }
+</div>
